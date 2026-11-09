@@ -98,7 +98,7 @@
   }
   let pending=false;function schedule(){if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;scan()})}
   new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true});
-  window.addEventListener('pagehide',stopListening);document.addEventListener('visibilitychange',()=>{if(document.hidden)stopListening()});
+  window.addEventListener('pagehide',stopListening);document.addEventListener('bio3-qa-reset',stopListening);document.addEventListener('visibilitychange',()=>{if(document.hidden)stopListening()});
   schedule();
 })();
 </script>
