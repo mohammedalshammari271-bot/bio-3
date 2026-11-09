@@ -3,148 +3,44 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>مختبر الأحياء | الجهاز العصبي</title>
-<meta name="theme-color" content="#143a6b">
+<meta name="theme-color" content="#102c4b">
+<title>مختبر الأحياء — الجهاز العصبي</title>
 <style>
-:root{color-scheme:light;font-family:Tahoma,Arial,system-ui,sans-serif;background:#eef3fa;color:#163653}*{box-sizing:border-box}body{margin:0}
-header{padding:13px max(15px,env(safe-area-inset-right)) 11px;background:linear-gradient(110deg,#122c53,#18578d);color:white;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
-header h1{margin:0;font-size:clamp(17px,3.8vw,23px);font-weight:800}header p{font-size:12px;margin:4px 0 0;color:#d7eafc}
-.tabs{padding:9px 10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#eef3fa}
-.tabs button{background:#fff;border:1px solid #cbd8e9;color:#17385a;border-radius:13px;text-align:right;padding:11px 13px;font:700 14px Tahoma,Arial,sans-serif;cursor:pointer;min-height:68px;line-height:1.5}
-.tabs button span{display:block;font-size:11px;color:#63778f;font-weight:400}
-.tabs button[aria-selected=true]{background:#dfefff;border:2px solid #2468ab;color:#11375e;padding:10px 12px}
-main{position:relative;height:calc(100dvh - 157px);min-height:340px;background:white}section.panel{position:absolute;inset:0}section.panel[hidden]{display:none}
-iframe{width:100%;height:100%;display:block;border:0;background:#fff}
-.loader{position:absolute;inset:0;z-index:2;background:#f7faff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:22px}
-.loader[hidden]{display:none}.loader h2{font-size:19px;margin:0}.loader p{margin:0;font-size:14px;line-height:1.8;max-width:340px;color:#52667d}
-.progress{height:9px;width:min(320px,90%);background:#dce6f3;border-radius:99px;overflow:hidden}.progress div{height:100%;width:0;background:#2374bd;border-radius:99px;transition:width .15s}
-#retry{font:700 14px Tahoma,sans-serif;background:#246db1;color:white;border:0;border-radius:12px;padding:12px 20px;cursor:pointer}
+:root{color-scheme:light;font-family:Tahoma,Arial,system-ui,sans-serif;color:#163653;background:#f0f5fa}
+*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden}
+#lab{display:block;width:100%;height:100%;border:0;background:#fff}
+#loading{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:22px;background:#f0f5fa}
+#loading[hidden]{display:none}
+#card{width:min(420px,95%);text-align:center;padding:30px 22px;background:#fff;border:1px solid #d9e4ef;border-radius:22px;box-shadow:0 12px 35px #14426918}
+h1{font-size:22px;margin:0 0 12px}p{font-size:14px;line-height:1.8;color:#496579;margin:0 0 16px}
+#track{height:9px;background:#e1eaf2;overflow:hidden;border-radius:99px}#bar{width:0;height:100%;background:#2d80b7;transition:width .2s}
+#retry{display:block;margin:20px auto 0;background:#164d82;color:white;font:bold 15px Tahoma,Arial;border:0;border-radius:11px;padding:11px 20px;cursor:pointer}
 #retry[hidden]{display:none}
-@media(min-width:700px){header{padding:14px 32px}.tabs{max-width:920px;margin:auto;background:transparent}.tabs button{min-height:62px}main{height:calc(100dvh - 141px)}}
-</style>
-<style id="unified-nav-css">
-body{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
-header{flex:0 0 auto}
-.tabs{flex:0 0 auto;display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;gap:7px;max-width:none!important;margin:0!important;padding:9px 13px!important;scrollbar-width:thin;background:#f3f7fc!important}
-.tabs button{flex:0 0 auto;min-height:43px!important;padding:11px 13px!important;font-size:14px!important;text-align:center!important;border-radius:11px!important;white-space:nowrap}
-.tabs button[hidden]{display:none!important}
-.tabs button[aria-selected=true]{background:#123c65!important;border:1px solid #123c65!important;color:#fff!important}
-#feature-help{background:#e5eff8;padding:5px 13px;text-align:center;color:#426178;font-size:12px;flex:0 0 auto}
-main{height:auto!important;min-height:0!important;flex:1 1 0;overflow:hidden}
-section.panel{inset:0}
-@media(max-width:700px){header{padding:10px 13px}header h1{font-size:16px}header p{font-size:11px}.tabs button{font-size:13px!important;min-height:45px!important}}
 </style>
 </head>
 <body>
-<header><div><h1>مختبر الأحياء — الجهاز العصبي</h1><p>الصف الثالث المتوسط • تجربة تعليمية متكاملة</p></div><span style="font-size:12px;color:#daebff">النسخة الموحّدة</span></header>
-<nav class="tabs" role="tablist" aria-label="أقسام مختبر الأحياء">
-<button id="tab-extended" hidden type="button">الشامل</button><button id="tab-original" hidden type="button">الأصلي</button>
-<button data-feature="lab" aria-selected="true" aria-controls="panel-extended">🧠 المختبر 3D</button>
-<button data-feature="exp" aria-selected="false" aria-controls="panel-extended">🔬 التجارب</button>
-<button data-feature="lesson" aria-selected="false" aria-controls="panel-extended">📖 شرح الدرس</button>
-<button data-feature="qa" aria-selected="false" aria-controls="panel-original">📋 سؤال وجواب</button>
-<button data-feature="quiz" aria-selected="false" aria-controls="panel-extended">📝 الاختبارات</button>
-<button data-feature="vault" aria-selected="false" aria-controls="panel-extended">🗂️ خزنة الأخطاء</button>
-<button data-feature="night" aria-selected="false" aria-controls="panel-extended">🌙 ليلة الامتحان</button>
-<button data-feature="parent" aria-selected="false" aria-controls="panel-extended">👪 ولي الأمر</button>
-<button data-feature="cards" aria-selected="false" aria-controls="panel-extended">▣ البطاقات</button>
-<button data-feature="maps" aria-selected="false" aria-controls="panel-extended">🗺️ الخرائط الذهنية</button>
-<button data-feature="recite" aria-selected="false" aria-controls="panel-original">🎙️ التسميع</button>
-</nav><div id="feature-help" role="status">اسحب شريط الميزات يميناً ويساراً لعرض باقي الأقسام.</div>
-<main>
-<section id="panel-extended" class="panel" role="tabpanel" aria-labelledby="tab-extended">
-  <div class="loader" id="loader"><h2 id="loader-title">جاري تجهيز المختبر الشامل...</h2><p id="loader-desc">يُحمَّل المحتوى مرة واحدة من موقع GitHub ثم يُحفظ بذاكرة المتصفح المؤقتة.</p><div class="progress" aria-label="تقدّم التحميل"><div id="bar"></div></div><button type="button" id="retry" hidden>إعادة المحاولة</button></div>
-  <iframe id="iframe-extended" title="المختبر ثلاثي الأبعاد والاختبارات والخرائط الذهنية" allow="microphone; autoplay; fullscreen"></iframe>
-</section>
-<section id="panel-original" class="panel" role="tabpanel" aria-labelledby="tab-original" hidden>
-  <iframe id="iframe-original" title="سؤال وجواب والتسميع" allow="microphone; autoplay; fullscreen" loading="lazy"></iframe>
-</section>
-</main>
+<div id="loading" role="status" aria-live="polite"><div id="card"><h1 id="heading">مختبر الأحياء — الجهاز العصبي</h1><p id="message">جاري تحميل المختبر وميزاته المدمجة...</p><div id="track"><div id="bar"></div></div><button type="button" id="retry" hidden>إعادة المحاولة</button></div></div>
+<iframe id="lab" title="مختبر الأحياء الموحد: مجسمات وتجارب واختبارات وبطاقات وخرائط وتسميع" allow="microphone; autoplay; fullscreen" loading="eager"></iframe>
 <script>
-(function(){
-"use strict";
-const total=21,ext=document.getElementById("panel-extended"),orig=document.getElementById("panel-original"),tabExt=document.getElementById("tab-extended"),tabOrig=document.getElementById("tab-original"),loader=document.getElementById("loader"),desc=document.getElementById("loader-desc"),title=document.getElementById("loader-title"),bar=document.getElementById("bar"),retry=document.getElementById("retry"),extFrame=document.getElementById("iframe-extended"),origFrame=document.getElementById("iframe-original");
-const originalUrl="./"+encodeURIComponent("مختبر-الأحياء-الجهاز-العصبي.html");
-let loaded=false,loading=false,originalLoaded=false;
-function switchTo(which){
- const isExt=which==="extended";ext.hidden=!isExt;orig.hidden=isExt;
- tabExt.setAttribute("aria-selected",String(isExt));tabOrig.setAttribute("aria-selected",String(!isExt));
- if(isExt&&!loaded&&!loading) loadExtended();
- if(!isExt&&!originalLoaded){origFrame.src=originalUrl;originalLoaded=true;}
-}
-tabExt.addEventListener("click",()=>switchTo("extended"));
-tabOrig.addEventListener("click",()=>switchTo("original"));
-retry.addEventListener("click",()=>loadExtended());
-async function loadExtended(){
- if(loading||loaded)return;
- loading=true;retry.hidden=true;loader.hidden=false;title.textContent="جاري تجهيز المختبر الشامل...";desc.textContent="قد يستغرق التحميل الأول بعض الوقت حسب سرعة الإنترنت.";bar.style.width="0%";
- const parts=new Array(total);let next=0,done=0;
- async function worker(){
-   while(next<total){
-     const i=next++;
-     const url="./extended/part-"+String(i).padStart(3,"0")+".txt";
-     const response=await fetch(url,{cache:"force-cache"});
-     if(!response.ok)throw new Error("تعذّر تحميل الجزء "+(i+1)+"، رمز "+response.status);
-     parts[i]=await response.text();done++;
-     bar.style.width=Math.floor(done/total*100)+"%";
-     desc.textContent="اكتمل تحميل "+done+" من "+total+" جزءاً.";
-   }
- }
- try{
-   await Promise.all(Array.from({length:4},()=>worker()));
-   const complete=parts.join("");
-   if(!complete.startsWith("<!doctype html>")||!complete.includes("</html>"))throw new Error("المحتوى المستلم غير مكتمل");
-   extFrame.addEventListener("load",()=>{loader.hidden=true;}, {once:true});
-   extFrame.srcdoc=complete;
-   loaded=true;
- }catch(err){
-   title.textContent="تعذّر تحميل المختبر الشامل";
-   desc.textContent=err.message+" — جرّب إعادة التحميل أو افتح فقرة سؤال وجواب.";
-   retry.hidden=false;
- }finally{loading=false;}
-}
-switchTo("extended");
+(()=>{'use strict';
+const count=21,frame=document.getElementById('lab'),loading=document.getElementById('loading'),heading=document.getElementById('heading'),message=document.getElementById('message'),bar=document.getElementById('bar'),retry=document.getElementById('retry');
+let busy=false;
+const timeout=15000;
+async function loadText(url){const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),timeout);try{const r=await fetch(url,{cache:'force-cache',signal:ctrl.signal});if(!r.ok)throw Error('فشل تحميل '+url+' (رمز '+r.status+')');return await r.text()}finally{clearTimeout(timer)}}
+async function run(){if(busy)return;busy=true;retry.hidden=true;loading.hidden=false;heading.textContent='مختبر الأحياء — الجهاز العصبي';message.textContent='جاري تحميل المختبر وميزاته المدمجة...';bar.style.width='0%';
+ const parts=new Array(count);let next=0,done=0;
+ const patchTask=loadText('./integrated-features.html');
+ async function worker(){while(next<count){let i=next++;parts[i]=await loadText('./extended/part-'+String(i).padStart(3,'0')+'.txt');done++;bar.style.width=Math.floor(done/count*94)+'%';message.textContent='تم تحميل '+done+' من '+count+' جزءاً من المختبر.';}}
+ try{await Promise.all(Array.from({length:4},worker));const patch=await patchTask,html=parts.join('');
+ if(!/^\s*<!doctype html>/i.test(html)||!/<\/body>\s*<\/html>\s*$/i.test(html))throw Error('ملفات المختبر غير مكتملة.');
+ if(!patch.includes('id="unified-stage"')||!patch.includes('id="unified-qa-json"'))throw Error('تعذّر تحميل الأزرار المدمجة.');
+ const close=html.lastIndexOf('</body>');if(close<0)throw Error('بنية ملف المختبر غير صحيحة.');
+ const joined=html.slice(0,close)+'\n'+patch+'\n'+html.slice(close);
+ frame.addEventListener('load',()=>{bar.style.width='100%';loading.hidden=true;},{once:true});
+ frame.srcdoc=joined;
+ }catch(e){heading.textContent='تعذّر تشغيل المختبر';message.textContent=e?.message||'خطأ غير معروف';retry.hidden=false;}finally{busy=false}}
+ retry.addEventListener('click',run);run();
 })();
 </script>
-<script id="unified-feature-controller">
-(function(){"use strict";
-const ext=document.getElementById("iframe-extended"),orig=document.getElementById("iframe-original");
-const help=document.getElementById("feature-help"),navButtons=Array.from(document.querySelectorAll(".tabs [data-feature]"));
-const labels={exp:"التجارب",lesson:"سؤال وجواب",quiz:"اختبرني",vault:"خزنة الأخطاء",night:"ليلة الامتحان",parent:"ولي الأمر"};
-let current="lab",ticket=0;
-function setHelp(s){help.textContent=s;}
-function nativeClick(kind,tries=0,seq=ticket){
- if(seq!==ticket)return;
- if(kind==="lab"){setHelp("المختبر ثلاثي الأبعاد — جميع المميزات ضمن الواجهة نفسها.");return;}
- const isOriginal=(kind==="qa"||kind==="recite"),frame=isOriginal?orig:ext;
- let doc;try{doc=frame.contentDocument;}catch{}
- if(!doc||!doc.body||doc.readyState==="loading"){if(tries<36)setTimeout(()=>nativeClick(kind,tries+1,seq),350);return;}
- let target=null;
- if(kind==="cards")target=doc.getElementById("biofc-open");
- else if(kind==="maps")target=doc.getElementById("biomaps-open");
- else{
-  const text=isOriginal?(kind==="recite"?"تسميع":"سؤال وجواب"):labels[kind];
-  const elems=Array.from(doc.querySelectorAll("button,[role=tab],a,[role=button]"));
-  target=elems.find(e=>e.textContent.replace(/\s+/g," ").trim()===text)
-   ||elems.find(e=>e.textContent.replace(/\s+/g," ").trim().includes(text)&&e.textContent.length<60);
- }
- if(target){try{target.click();setHelp("تم فتح القسم: "+navButtons.find(b=>b.dataset.feature===kind).textContent.trim());}catch(e){setHelp("افتح القسم من الأزرار المعروضة داخل المختبر.")}return;}
- if(tries<24){setTimeout(()=>nativeClick(kind,tries+1,seq),450);return;}
- if(isOriginal)setHelp("قسم سؤال وجواب والتسميع ظاهر؛ استخدم أزرار التسميع داخل المحتوى.");
- else setHelp("يحتاج القسم تحميل واجهة المختبر؛ إذا بقي غير ظاهر اختاره من القائمة الداخلية للمختبر.");
-}
-function go(kind){
- current=kind;ticket++;
- for(const b of navButtons)b.setAttribute("aria-selected",String(b.dataset.feature===kind));
- const isOriginal=kind==="qa"||kind==="recite";
- document.getElementById(isOriginal?"tab-original":"tab-extended").click();
- setHelp("جاري فتح "+(navButtons.find(b=>b.dataset.feature===kind)?.textContent.trim()||"القسم")+"...");
- nativeClick(kind,0,ticket);
-}
-navButtons.forEach(b=>b.addEventListener("click",()=>go(b.dataset.feature)));
-function tidyExtended(){try{const doc=ext.contentDocument;if(doc&&!doc.getElementById("feature-nav-style")){const style=doc.createElement("style");style.id="feature-nav-style";style.textContent="#biofc-open,#biomaps-open{display:none!important}";doc.head.appendChild(style);}}catch{}}
-ext.addEventListener("load",()=>{tidyExtended();if(current!=="qa"&&current!=="recite")nativeClick(current,0,ticket)});
-orig.addEventListener("load",()=>{if(current==="qa"||current==="recite")nativeClick(current,0,ticket)});
-})();
-</script>
-</body></html>
+</body>
+</html>
