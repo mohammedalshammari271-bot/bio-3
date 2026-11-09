@@ -19,7 +19,7 @@ h1{font-size:22px;margin:0 0 12px}p{font-size:14px;line-height:1.8;color:#496579
 </style>
 </head>
 <body>
-<div id="loading" role="status" aria-live="polite"><div id="card"><h1 id="heading">مختبر الأحياء — الجهاز العصبي</h1><p id="message">جاري تحميل المختبر وميزاته المدمجة...</p><div id="track"><div id="bar"></div></div><button type="button" id="retry" hidden>إعادة المحاولة</button></div></div>
+<div id="loading" role="status" aria-live="polite"><div id="card"><h1 id="heading">مختبر الأحياء — الجهاز العصبي</h1><p id="message">جاري تحميل مختبر الأحياء مع أدوات السؤال والجواب...</p><div id="track"><div id="bar"></div></div><button type="button" id="retry" hidden>إعادة المحاولة</button></div></div>
 <iframe id="lab" title="مختبر الأحياء الموحد: مجسمات وتجارب واختبارات وبطاقات وخرائط وتسميع" allow="microphone; autoplay; fullscreen" loading="eager"></iframe>
 <script>
 (()=>{'use strict';
@@ -29,11 +29,11 @@ const timeout=15000;
 async function loadText(url){const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),timeout);try{const r=await fetch(url,{cache:'force-cache',signal:ctrl.signal});if(!r.ok)throw Error('فشل تحميل '+url+' (رمز '+r.status+')');return await r.text()}finally{clearTimeout(timer)}}
 async function run(){if(busy)return;busy=true;retry.hidden=true;loading.hidden=false;heading.textContent='مختبر الأحياء — الجهاز العصبي';message.textContent='جاري تحميل المختبر وميزاته المدمجة...';bar.style.width='0%';
  const parts=new Array(count);let next=0,done=0;
- const patchTask=loadText('./integrated-features.html');
+ const patchTask=Promise.all([loadText('./qa-shell.html'),loadText('./qa-inline-tutor.html')]).then(a=>a.join('\n'));
  async function worker(){while(next<count){let i=next++;parts[i]=await loadText('./extended/part-'+String(i).padStart(3,'0')+'.txt');done++;bar.style.width=Math.floor(done/count*94)+'%';message.textContent='تم تحميل '+done+' من '+count+' جزءاً من المختبر.';}}
  try{await Promise.all(Array.from({length:4},worker));const patch=await patchTask,html=parts.join('');
  if(!/^\s*<!doctype html>/i.test(html)||!/<\/body>\s*<\/html>\s*$/i.test(html))throw Error('ملفات المختبر غير مكتملة.');
- if(!patch.includes('id="unified-stage"')||!patch.includes('id="unified-qa-json"'))throw Error('تعذّر تحميل الأزرار المدمجة.');
+ if(!patch.includes('id="qa-shell-script"')||!patch.includes('id="qa-inline-tutor-script"'))throw Error('تعذّر تحميل أدوات السؤال والجواب المدمجة.');
  const close=html.lastIndexOf('</body>');if(close<0)throw Error('بنية ملف المختبر غير صحيحة.');
  const joined=html.slice(0,close)+'\n'+patch+'\n'+html.slice(close);
  frame.addEventListener('load',()=>{bar.style.width='100%';loading.hidden=true;},{once:true});
