@@ -1,0 +1,104 @@
+<style id="qa-inline-tutor-css">
+/* Add practice solely inside the original سؤال وجواب cards. Never replace the course UI. */
+#nur-qa .qa-toolbox{display:flex;flex-direction:column;gap:10px;border:1px solid var(--border,#cbd5e1);border-radius:16px;padding:14px;background:color-mix(in srgb,var(--card,#fff) 90%,#d8edf6);direction:rtl;color:var(--foreground,#18334b);font-family:inherit;line-height:1.65;margin:4px 0 14px;max-width:100%;overflow:hidden}
+#nur-qa .qa-toolbox *{box-sizing:border-box}
+#nur-qa .qa-toolbox .qa-title{font-size:15px;font-weight:800;color:var(--color-primary,#184c7b);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#nur-qa .qa-toolbox .qa-note{font-size:12px;opacity:.8}
+#nur-qa .qa-toolbox .qa-buttons{display:flex;flex-wrap:wrap;gap:7px}
+#nur-qa .qa-toolbox button{border:1px solid var(--border,#cdd8e3);border-radius:10px;padding:8px 12px;background:var(--background,#fff);color:var(--foreground,#16304a);font:600 13px Tahoma,Arial,sans-serif;cursor:pointer;min-height:38px;touch-action:manipulation}
+#nur-qa .qa-toolbox button.qa-main{background:var(--color-primary,#155b8b);color:#fff;border-color:transparent}
+#nur-qa .qa-toolbox button:focus-visible,#nur-qa .qa-toolbox textarea:focus-visible{outline:3px solid #269bcc;outline-offset:2px}
+#nur-qa .qa-toolbox textarea{display:block;width:100%;min-height:86px;max-height:240px;resize:vertical;border:1px solid var(--border,#cdd8e3);border-radius:11px;background:var(--background,#fff);color:var(--foreground,#142b40);padding:11px;font:15px/1.8 Tahoma,Arial,sans-serif;direction:rtl;text-align:right}
+#nur-qa .qa-toolbox .qa-status{font-size:13px;line-height:1.7;color:var(--muted-foreground,#536a80)}
+#nur-qa .qa-toolbox .qa-feedback{font-size:14px;border-radius:11px;padding:11px;background:color-mix(in srgb,var(--card,#fff) 78%,#cce8da);white-space:pre-wrap;line-height:1.8}
+#nur-qa .qa-toolbox .qa-feedback[hidden]{display:none}
+#nur-qa .nq-ans.qa-masked > :not(.qa-toolbox){display:none!important}
+#nur-qa .qa-toolbox .qa-progress{height:8px;border-radius:8px;background:#dce7ef;overflow:hidden}
+#nur-qa .qa-toolbox .qa-progress span{display:block;height:100%;background:#168572;width:0;transition:width .2s}
+#nur-qa .qa-toolbox button[disabled]{opacity:.48;cursor:not-allowed}
+@media (max-width:600px){#nur-qa .qa-toolbox{padding:11px;border-radius:13px}#nur-qa .qa-toolbox button{flex:1 1 auto;min-height:42px}}
+</style>
+<script id="qa-inline-tutor-script">
+(()=>{'use strict';
+  const ROOT='nur-qa',STORE='bio3-qa-review-v1';
+  const get=(id)=>document.getElementById(id);
+  const dict=(()=>{try{const d=get('nur-qa-data');return d?JSON.parse(d.textContent):null}catch{return null}})();
+  const Speech=window.SpeechRecognition||window.webkitSpeechRecognition;
+  let activeRecognition=null,activePanel=null;
+  let progress={};try{progress=JSON.parse(localStorage.getItem(STORE)||'{}')}catch{}
+  function make(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el}
+  function note(el,s){el.textContent=s}
+  function textOfReference(ans){return [...ans.querySelectorAll('.nq-pre,.nq-table')].map(n=>n.innerText||n.textContent||'').join(' ').trim()}
+  function normalize(s){return String(s||'').toLowerCase().replace(/[\u064b-\u065f\u0670\u0640]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/[٠-٩]/g,c=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(c))).replace(/[^\u0621-\u064a0-9\s]/g,' ').replace(/\s+/g,' ').trim()}
+  const stopWords=new Set('من في على عن الى الي ان إن أن هذا هذه ذلك تلك هو هي هم هنا هناك الذي التي الذين كما مع او أو ثم وقد لقد بعد قبل و اذا إذا كان تكون يكون يتم عليه عليها له لها وما بما بين عند الى بسبب مثل مثال مثلا اولا ثانيا ثالثا سؤال جواب هيج يعني همين ايضا أيضاً حيث لا لم لن قد كل بعض لدى منه فيها لل من خلال حسب ذلك'.split(/\s+/).map(normalize));
+  function token(w){if(w.startsWith('وال')&&w.length>6)w=w.slice(1);else if(w.startsWith('و')&&w.length>5)w=w.slice(1);if(w.startsWith('ال')&&w.length>5)w=w.slice(2);return w}
+  function words(s){return normalize(s).split(' ').map(token).filter(w=>w.length>2&&!stopWords.has(w))}
+  function evaluate(ref,student){
+    const rr=[...new Set(words(ref))],ss=[...new Set(words(student))];if(!rr.length||!ss.length)return null;
+    const hit=rr.filter(w=>ss.some(s=>w===s||(w.length>5&&s.length>5&&(w.startsWith(s)||s.startsWith(w)))));
+    const coverage=hit.length/rr.length,precision=ss.filter(w=>rr.some(r=>r===w||(r.length>5&&w.length>5&&(w.startsWith(r)||r.startsWith(w))))).length/ss.length;
+    const score=Math.max(0,Math.min(100,Math.round(100*(.75*coverage+.25*precision))));
+    return {score,hit:hit.length,total:rr.length,missing:rr.filter(w=>!hit.includes(w)).slice(0,8)};
+  }
+  function answerForQuestion(item){
+    const ans=item.querySelector('.nq-ans');if(!ans)return '';
+    let txt=textOfReference(ans);
+    if(!txt&&dict){const q=item.querySelector('.nq-qt > span')?.textContent?.trim();for(const sec of dict.qa||[])for(const i of sec.items||[])if(i.q===q){txt=[i.a||'',i.after||'',...(i.table?.rows||[]).flat()].join(' ');break}}
+    return txt;
+  }
+  function saveQuestion(item,score){try{const q=item.querySelector('.nq-qt > span')?.textContent||'';progress[q]={score,updated:Date.now()};localStorage.setItem(STORE,JSON.stringify(progress))}catch{}}
+  function stopListening(){if(activeRecognition){try{activeRecognition.stop()}catch{} activeRecognition=null;}if(activePanel){activePanel.listening=false;activePanel=null}}
+  function startListening(panel){
+    if(!Speech){note(panel.status,'التعرف الصوتي غير مدعوم بهذا المتصفح. تگدر تكتب إجابتك وتضغط «قيّم إجابتي».');return}
+    stopListening();
+    const rec=new Speech();rec.lang='ar-IQ';rec.continuous=true;rec.interimResults=true;
+    const initial=panel.textarea.value.trim();let finals=[];
+    rec.onresult=(e)=>{let interim='';for(let j=e.resultIndex;j<e.results.length;j++){const frag=e.results[j][0].transcript||'';if(e.results[j].isFinal) finals.push(frag.trim());else interim+=' '+frag}
+      panel.textarea.value=[initial,...finals,interim.trim()].filter(Boolean).join(' ').trim();};
+    rec.onstart=()=>{note(panel.status,'🎙 المايكروفون شغّال... جاوب من حفظك، وبعدها اضغط «إيقاف».');panel.listen.textContent='🎙 جاري الاستماع';panel.listen.disabled=true};
+    rec.onerror=(e)=>{const errors={not_allowed:'صلاحية المايكروفون مرفوضة.',no_speech:'ما انسمع صوت. حاول مرة ثانية.',network:'خدمة التعرف الصوتي بالمتصفح غير متاحة حالياً.',audio_capture:'المايكروفون غير متاح.'};note(panel.status,errors[(e.error||'').replace(/-/g,'_')]||'تعذّر التعرف على الصوت. اكتب الإجابة بدلاً من ذلك.')};
+    rec.onend=()=>{if(activeRecognition===rec){activeRecognition=null;activePanel=null}panel.listen.textContent='🎙 ابدأ التسميع';panel.listen.disabled=false;if(panel.status.textContent.includes('شغّال'))note(panel.status,'انتهى التسميع. راجع النص ثم اضغط «قيّم إجابتي».')};
+    activeRecognition=rec;activePanel=panel;
+    try{rec.start()}catch{stopListening();note(panel.status,'تعذّر تشغيل المايكروفون. جرّب Chrome على الموقع الآمن أو اكتب الإجابة.');panel.listen.disabled=false}
+  }
+  function buildPanel(item){
+    const ans=item.querySelector('.nq-ans');if(!ans||ans.querySelector('.qa-toolbox'))return;
+    const box=make('div','qa-toolbox');box.setAttribute('role','region');box.setAttribute('aria-label','التسميع والتقييم داخل السؤال والجواب');
+    const title=make('div','qa-title','🎓 أسمّع إجابتي من حفظي');
+    const status=make('div','qa-status','اختَر «ابدأ التسميع» أو اكتب إجابتك، وبعدها قيّمها.');status.setAttribute('aria-live','polite');
+    const textarea=make('textarea');textarea.setAttribute('aria-label','نص جواب الطالب للتسميع');textarea.placeholder='إجابتك من حفظك تظهر هنا… وتگدر تكتبها أيضاً.';
+    const controls=make('div','qa-buttons');
+    const btn=(txt,primary=false)=>{const b=make('button',primary?'qa-main':'',txt);b.type='button';controls.appendChild(b);return b};
+    const listen=btn('🎙 ابدأ التسميع',true),stop=btn('■ إيقاف'),grade=btn('✓ قيّم إجابتي',true),reveal=btn('👁 إظهار الجواب'),read=btn('🔊 اقرأ السؤال'),clear=btn('↺ مسح');
+    const result=make('div','qa-feedback');result.hidden=true;result.setAttribute('aria-live','polite');
+    const progressBar=make('div','qa-progress'),bar=make('span');progressBar.appendChild(bar);progressBar.hidden=true;
+    const fine=make('div','qa-note','التقييم تقدير أولي بمقارنة الكلمات مع جواب المنهج، وليس تصحيحاً علمياً نهائياً. التعرف الصوتي يعتمد على دعم المتصفح وقد يستخدم خدمة الشبكة.');
+    box.append(title,status,textarea,controls,progressBar,result,fine);
+    ans.insertBefore(box,ans.firstChild);
+    const panel={item,ans,box,status,textarea,listen,listening:false};
+    const showAnswer=(flag)=>{ans.classList.toggle('qa-masked',!flag);reveal.textContent=flag?'🙈 أخفِ الجواب':'👁 إظهار الجواب'};
+    showAnswer(true);
+    listen.onclick=()=>{showAnswer(false);startListening(panel)};
+    stop.onclick=()=>{if(activePanel===panel)stopListening();note(status,'توقف التسجيل. تگدر تراجع النص وتقيّم الإجابة.')};
+    grade.onclick=()=>{if(activePanel===panel)stopListening();const txt=textarea.value.trim();if(!txt){note(status,'لازم تجاوب أولاً، بالصوت أو الكتابة.');textarea.focus();return}
+      const ref=answerForQuestion(item);const r=evaluate(ref,txt);
+      if(!r){result.hidden=false;result.textContent='ما أگدر أقيّم هذا الجواب تلقائياً. افتح الإجابة وقارنها بالنص الأصلي.';progressBar.hidden=true;return}
+      result.hidden=false;progressBar.hidden=false;bar.style.width=r.score+'%';
+      result.textContent='التطابق النصّي التقريبي: '+r.score+'٪\nالكلمات الأساسية الموجودة: '+r.hit+' من '+r.total+'\n'+(r.missing.length?'كلمات من جواب المنهج قد تحتاج تراجعها: '+r.missing.join('، '):'ما ظهرت كلمات أساسية ناقصة في هذه المقارنة.')+'\nهذه النسبة ليست درجة وزارية ولا حكم بصحة المعنى.';
+      saveQuestion(item,r.score);note(status,'تم التقييم الأولي. تگدر تكشف جواب الكتاب وتقارن إجابتك.');
+    };
+    reveal.onclick=()=>showAnswer(ans.classList.contains('qa-masked'));
+    read.onclick=()=>{if(!('speechSynthesis' in window)){note(status,'القراءة الصوتية غير مدعومة هنا.');return}try{speechSynthesis.cancel();const q=item.querySelector('.nq-qt > span')?.textContent||'';const u=new SpeechSynthesisUtterance(q);u.lang='ar-IQ';u.rate=.9;const voices=speechSynthesis.getVoices(),v=voices.find(v=>/^ar[-_]IQ/i.test(v.lang))||voices.find(v=>/^ar/i.test(v.lang));if(v)u.voice=v;speechSynthesis.speak(u);note(status,'جاري قراءة السؤال بصوت المتصفح، وقد لا تتوفر لهجة عراقية على جهازك.')}catch{note(status,'تعذّرت قراءة السؤال على هذا الجهاز.')}};
+    clear.onclick=()=>{if(activePanel===panel)stopListening();textarea.value='';result.hidden=true;progressBar.hidden=true;bar.style.width='0%';showAnswer(true);note(status,'تم مسح الإجابة. تگدر تعيد التسميع.');};
+    return panel;
+  }
+  function openFirst(host){const open=host.querySelector('.nq-item.open')||host.querySelector('.nq-item');if(!open)return;if(!open.classList.contains('open'))open.querySelector('.nq-q')?.click();const panel=buildPanel(open);if(panel){panel.box.scrollIntoView({behavior:'smooth',block:'center'});panel.textarea.focus({preventScroll:true});panel.ans.classList.add('qa-masked');const reveal=panel.box.querySelectorAll('button')[3];if(reveal)reveal.textContent='👁 إظهار الجواب'}else{const b=open.querySelector('.qa-toolbox');if(b){b.scrollIntoView({behavior:'smooth',block:'center'});b.querySelector('textarea')?.focus({preventScroll:true});open.querySelector('.nq-ans')?.classList.add('qa-masked');const rv=b.querySelectorAll('button')[3];if(rv)rv.textContent='👁 إظهار الجواب'}}}
+  function scan(){const host=get(ROOT);if(!host)return;const header=host.querySelector('.nq-head .nq-rec');if(header&&!header.dataset.qaInline){header.dataset.qaInline='true';header.textContent='🎙 التسميع داخل السؤال والجواب';header.onclick=()=>openFirst(host)}
+    for(const item of host.querySelectorAll('.nq-item'))if(item.querySelector('.nq-ans')&&!item.querySelector('.qa-toolbox'))buildPanel(item);
+  }
+  let pending=false;function schedule(){if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;scan()})}
+  new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true});
+  window.addEventListener('pagehide',stopListening);document.addEventListener('visibilitychange',()=>{if(document.hidden)stopListening()});
+  schedule();
+})();
+</script>
