@@ -22,13 +22,35 @@ iframe{width:100%;height:100%;display:block;border:0;background:#fff}
 #retry[hidden]{display:none}
 @media(min-width:700px){header{padding:14px 32px}.tabs{max-width:920px;margin:auto;background:transparent}.tabs button{min-height:62px}main{height:calc(100dvh - 141px)}}
 </style>
+<style id="unified-nav-css">
+body{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+header{flex:0 0 auto}
+.tabs{flex:0 0 auto;display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;gap:7px;max-width:none!important;margin:0!important;padding:9px 13px!important;scrollbar-width:thin;background:#f3f7fc!important}
+.tabs button{flex:0 0 auto;min-height:43px!important;padding:11px 13px!important;font-size:14px!important;text-align:center!important;border-radius:11px!important;white-space:nowrap}
+.tabs button[hidden]{display:none!important}
+.tabs button[aria-selected=true]{background:#123c65!important;border:1px solid #123c65!important;color:#fff!important}
+#feature-help{background:#e5eff8;padding:5px 13px;text-align:center;color:#426178;font-size:12px;flex:0 0 auto}
+main{height:auto!important;min-height:0!important;flex:1 1 0;overflow:hidden}
+section.panel{inset:0}
+@media(max-width:700px){header{padding:10px 13px}header h1{font-size:16px}header p{font-size:11px}.tabs button{font-size:13px!important;min-height:45px!important}}
+</style>
 </head>
 <body>
 <header><div><h1>مختبر الأحياء — الجهاز العصبي</h1><p>الصف الثالث المتوسط • تجربة تعليمية متكاملة</p></div><span style="font-size:12px;color:#daebff">النسخة الموحّدة</span></header>
-<nav class="tabs" role="tablist" aria-label="أقسام المختبر">
-<button id="tab-extended" role="tab" aria-selected="true" aria-controls="panel-extended" type="button">المختبر الشامل<span>مجسمات 3D، اختبارات، خزنة الأخطاء، ليلة الامتحان، ولي الأمر، بطاقات وخرائط</span></button>
-<button id="tab-original" role="tab" aria-selected="false" aria-controls="panel-original" type="button">سؤال وجواب والتسميع<span>المحتوى الحالي والأسئلة والأجوبة والتسميع الصوتي</span></button>
-</nav>
+<nav class="tabs" role="tablist" aria-label="أقسام مختبر الأحياء">
+<button id="tab-extended" hidden type="button">الشامل</button><button id="tab-original" hidden type="button">الأصلي</button>
+<button data-feature="lab" aria-selected="true" aria-controls="panel-extended">🧠 المختبر 3D</button>
+<button data-feature="exp" aria-selected="false" aria-controls="panel-extended">🔬 التجارب</button>
+<button data-feature="lesson" aria-selected="false" aria-controls="panel-extended">📖 شرح الدرس</button>
+<button data-feature="qa" aria-selected="false" aria-controls="panel-original">📋 سؤال وجواب</button>
+<button data-feature="quiz" aria-selected="false" aria-controls="panel-extended">📝 الاختبارات</button>
+<button data-feature="vault" aria-selected="false" aria-controls="panel-extended">🗂️ خزنة الأخطاء</button>
+<button data-feature="night" aria-selected="false" aria-controls="panel-extended">🌙 ليلة الامتحان</button>
+<button data-feature="parent" aria-selected="false" aria-controls="panel-extended">👪 ولي الأمر</button>
+<button data-feature="cards" aria-selected="false" aria-controls="panel-extended">▣ البطاقات</button>
+<button data-feature="maps" aria-selected="false" aria-controls="panel-extended">🗺️ الخرائط الذهنية</button>
+<button data-feature="recite" aria-selected="false" aria-controls="panel-original">🎙️ التسميع</button>
+</nav><div id="feature-help" role="status">اسحب شريط الميزات يميناً ويساراً لعرض باقي الأقسام.</div>
 <main>
 <section id="panel-extended" class="panel" role="tabpanel" aria-labelledby="tab-extended">
   <div class="loader" id="loader"><h2 id="loader-title">جاري تجهيز المختبر الشامل...</h2><p id="loader-desc">يُحمَّل المحتوى مرة واحدة من موقع GitHub ثم يُحفظ بذاكرة المتصفح المؤقتة.</p><div class="progress" aria-label="تقدّم التحميل"><div id="bar"></div></div><button type="button" id="retry" hidden>إعادة المحاولة</button></div>
@@ -82,6 +104,46 @@ async function loadExtended(){
  }finally{loading=false;}
 }
 switchTo("extended");
+})();
+</script>
+<script id="unified-feature-controller">
+(function(){"use strict";
+const ext=document.getElementById("iframe-extended"),orig=document.getElementById("iframe-original");
+const help=document.getElementById("feature-help"),navButtons=Array.from(document.querySelectorAll(".tabs [data-feature]"));
+const labels={exp:"التجارب",lesson:"سؤال وجواب",quiz:"اختبرني",vault:"خزنة الأخطاء",night:"ليلة الامتحان",parent:"ولي الأمر"};
+let current="lab",ticket=0;
+function setHelp(s){help.textContent=s;}
+function nativeClick(kind,tries=0,seq=ticket){
+ if(seq!==ticket)return;
+ if(kind==="lab"){setHelp("المختبر ثلاثي الأبعاد — جميع المميزات ضمن الواجهة نفسها.");return;}
+ const isOriginal=(kind==="qa"||kind==="recite"),frame=isOriginal?orig:ext;
+ let doc;try{doc=frame.contentDocument;}catch{}
+ if(!doc||!doc.body||doc.readyState==="loading"){if(tries<36)setTimeout(()=>nativeClick(kind,tries+1,seq),350);return;}
+ let target=null;
+ if(kind==="cards")target=doc.getElementById("biofc-open");
+ else if(kind==="maps")target=doc.getElementById("biomaps-open");
+ else{
+  const text=isOriginal?(kind==="recite"?"تسميع":"سؤال وجواب"):labels[kind];
+  const elems=Array.from(doc.querySelectorAll("button,[role=tab],a,[role=button]"));
+  target=elems.find(e=>e.textContent.replace(/\s+/g," ").trim()===text)
+   ||elems.find(e=>e.textContent.replace(/\s+/g," ").trim().includes(text)&&e.textContent.length<60);
+ }
+ if(target){try{target.click();setHelp("تم فتح القسم: "+navButtons.find(b=>b.dataset.feature===kind).textContent.trim());}catch(e){setHelp("افتح القسم من الأزرار المعروضة داخل المختبر.")}return;}
+ if(tries<24){setTimeout(()=>nativeClick(kind,tries+1,seq),450);return;}
+ if(isOriginal)setHelp("قسم سؤال وجواب والتسميع ظاهر؛ استخدم أزرار التسميع داخل المحتوى.");
+ else setHelp("يحتاج القسم تحميل واجهة المختبر؛ إذا بقي غير ظاهر اختاره من القائمة الداخلية للمختبر.");
+}
+function go(kind){
+ current=kind;ticket++;
+ for(const b of navButtons)b.setAttribute("aria-selected",String(b.dataset.feature===kind));
+ const isOriginal=kind==="qa"||kind==="recite";
+ document.getElementById(isOriginal?"tab-original":"tab-extended").click();
+ setHelp("جاري فتح "+(navButtons.find(b=>b.dataset.feature===kind)?.textContent.trim()||"القسم")+"...");
+ nativeClick(kind,0,ticket);
+}
+navButtons.forEach(b=>b.addEventListener("click",()=>go(b.dataset.feature)));
+ext.addEventListener("load",()=>{if(current!=="qa"&&current!=="recite")nativeClick(current,0,ticket)});
+orig.addEventListener("load",()=>{if(current==="qa"||current==="recite")nativeClick(current,0,ticket)});
 })();
 </script>
 </body></html>
