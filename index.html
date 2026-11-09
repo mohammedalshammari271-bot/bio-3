@@ -142,7 +142,8 @@ function go(kind){
  nativeClick(kind,0,ticket);
 }
 navButtons.forEach(b=>b.addEventListener("click",()=>go(b.dataset.feature)));
-ext.addEventListener("load",()=>{if(current!=="qa"&&current!=="recite")nativeClick(current,0,ticket)});
+function tidyExtended(){try{const doc=ext.contentDocument;if(doc&&!doc.getElementById("feature-nav-style")){const style=doc.createElement("style");style.id="feature-nav-style";style.textContent="#biofc-open,#biomaps-open{display:none!important}";doc.head.appendChild(style);}}catch{}}
+ext.addEventListener("load",()=>{tidyExtended();if(current!=="qa"&&current!=="recite")nativeClick(current,0,ticket)});
 orig.addEventListener("load",()=>{if(current==="qa"||current==="recite")nativeClick(current,0,ticket)});
 })();
 </script>
