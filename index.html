@@ -1,5 +1,87 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>مختبر الأحياء — الجهاز العصبي</title><meta http-equiv="refresh" content="0;url=./%D9%85%D8%AE%D8%AA%D8%A8%D8%B1-%D8%A7%D9%84%D8%A3%D8%AD%D9%8A%D8%A7%D8%A1-%D8%A7%D9%84%D8%AC%D9%87%D8%A7%D8%B2-%D8%A7%D9%84%D8%B9%D8%B5%D8%A8%D9%8A.html"></head>
-<body style="font-family:Tahoma,Arial,sans-serif;text-align:center;padding:3rem"><h1>مختبر الأحياء — الجهاز العصبي</h1><p>جاري فتح المختبر...</p><a href="./%D9%85%D8%AE%D8%AA%D8%A8%D8%B1-%D8%A7%D9%84%D8%A3%D8%AD%D9%8A%D8%A7%D8%A1-%D8%A7%D9%84%D8%AC%D9%87%D8%A7%D8%B2-%D8%A7%D9%84%D8%B9%D8%B5%D8%A8%D9%8A.html">اضغط هنا إذا لم يفتح تلقائياً</a><script>location.replace('./%D9%85%D8%AE%D8%AA%D8%A8%D8%B1-%D8%A7%D9%84%D8%A3%D8%AD%D9%8A%D8%A7%D8%A1-%D8%A7%D9%84%D8%AC%D9%87%D8%A7%D8%B2-%D8%A7%D9%84%D8%B9%D8%B5%D8%A8%D9%8A.html');</script></body>
-</html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>مختبر الأحياء | الجهاز العصبي</title>
+<meta name="theme-color" content="#143a6b">
+<style>
+:root{color-scheme:light;font-family:Tahoma,Arial,system-ui,sans-serif;background:#eef3fa;color:#163653}*{box-sizing:border-box}body{margin:0}
+header{padding:13px max(15px,env(safe-area-inset-right)) 11px;background:linear-gradient(110deg,#122c53,#18578d);color:white;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+header h1{margin:0;font-size:clamp(17px,3.8vw,23px);font-weight:800}header p{font-size:12px;margin:4px 0 0;color:#d7eafc}
+.tabs{padding:9px 10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#eef3fa}
+.tabs button{background:#fff;border:1px solid #cbd8e9;color:#17385a;border-radius:13px;text-align:right;padding:11px 13px;font:700 14px Tahoma,Arial,sans-serif;cursor:pointer;min-height:68px;line-height:1.5}
+.tabs button span{display:block;font-size:11px;color:#63778f;font-weight:400}
+.tabs button[aria-selected=true]{background:#dfefff;border:2px solid #2468ab;color:#11375e;padding:10px 12px}
+main{position:relative;height:calc(100dvh - 157px);min-height:340px;background:white}section.panel{position:absolute;inset:0}section.panel[hidden]{display:none}
+iframe{width:100%;height:100%;display:block;border:0;background:#fff}
+.loader{position:absolute;inset:0;z-index:2;background:#f7faff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:22px}
+.loader[hidden]{display:none}.loader h2{font-size:19px;margin:0}.loader p{margin:0;font-size:14px;line-height:1.8;max-width:340px;color:#52667d}
+.progress{height:9px;width:min(320px,90%);background:#dce6f3;border-radius:99px;overflow:hidden}.progress div{height:100%;width:0;background:#2374bd;border-radius:99px;transition:width .15s}
+#retry{font:700 14px Tahoma,sans-serif;background:#246db1;color:white;border:0;border-radius:12px;padding:12px 20px;cursor:pointer}
+#retry[hidden]{display:none}
+@media(min-width:700px){header{padding:14px 32px}.tabs{max-width:920px;margin:auto;background:transparent}.tabs button{min-height:62px}main{height:calc(100dvh - 141px)}}
+</style>
+</head>
+<body>
+<header><div><h1>مختبر الأحياء — الجهاز العصبي</h1><p>الصف الثالث المتوسط • تجربة تعليمية متكاملة</p></div><span style="font-size:12px;color:#daebff">النسخة الموحّدة</span></header>
+<nav class="tabs" role="tablist" aria-label="أقسام المختبر">
+<button id="tab-extended" role="tab" aria-selected="true" aria-controls="panel-extended" type="button">المختبر الشامل<span>مجسمات 3D، اختبارات، خزنة الأخطاء، ليلة الامتحان، ولي الأمر، بطاقات وخرائط</span></button>
+<button id="tab-original" role="tab" aria-selected="false" aria-controls="panel-original" type="button">سؤال وجواب والتسميع<span>المحتوى الحالي والأسئلة والأجوبة والتسميع الصوتي</span></button>
+</nav>
+<main>
+<section id="panel-extended" class="panel" role="tabpanel" aria-labelledby="tab-extended">
+  <div class="loader" id="loader"><h2 id="loader-title">جاري تجهيز المختبر الشامل...</h2><p id="loader-desc">يُحمَّل المحتوى مرة واحدة من موقع GitHub ثم يُحفظ بذاكرة المتصفح المؤقتة.</p><div class="progress" aria-label="تقدّم التحميل"><div id="bar"></div></div><button type="button" id="retry" hidden>إعادة المحاولة</button></div>
+  <iframe id="iframe-extended" title="المختبر ثلاثي الأبعاد والاختبارات والخرائط الذهنية" allow="microphone; autoplay; fullscreen"></iframe>
+</section>
+<section id="panel-original" class="panel" role="tabpanel" aria-labelledby="tab-original" hidden>
+  <iframe id="iframe-original" title="سؤال وجواب والتسميع" allow="microphone; autoplay; fullscreen" loading="lazy"></iframe>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const total=21,ext=document.getElementById("panel-extended"),orig=document.getElementById("panel-original"),tabExt=document.getElementById("tab-extended"),tabOrig=document.getElementById("tab-original"),loader=document.getElementById("loader"),desc=document.getElementById("loader-desc"),title=document.getElementById("loader-title"),bar=document.getElementById("bar"),retry=document.getElementById("retry"),extFrame=document.getElementById("iframe-extended"),origFrame=document.getElementById("iframe-original");
+const originalUrl="./"+encodeURIComponent("مختبر-الأحياء-الجهاز-العصبي.html");
+let loaded=false,loading=false,originalLoaded=false;
+function switchTo(which){
+ const isExt=which==="extended";ext.hidden=!isExt;orig.hidden=isExt;
+ tabExt.setAttribute("aria-selected",String(isExt));tabOrig.setAttribute("aria-selected",String(!isExt));
+ if(isExt&&!loaded&&!loading) loadExtended();
+ if(!isExt&&!originalLoaded){origFrame.src=originalUrl;originalLoaded=true;}
+}
+tabExt.addEventListener("click",()=>switchTo("extended"));
+tabOrig.addEventListener("click",()=>switchTo("original"));
+retry.addEventListener("click",()=>loadExtended());
+async function loadExtended(){
+ if(loading||loaded)return;
+ loading=true;retry.hidden=true;loader.hidden=false;title.textContent="جاري تجهيز المختبر الشامل...";desc.textContent="قد يستغرق التحميل الأول بعض الوقت حسب سرعة الإنترنت.";bar.style.width="0%";
+ const parts=new Array(total);let next=0,done=0;
+ async function worker(){
+   while(next<total){
+     const i=next++;
+     const url="./extended/part-"+String(i).padStart(3,"0")+".txt";
+     const response=await fetch(url,{cache:"force-cache"});
+     if(!response.ok)throw new Error("تعذّر تحميل الجزء "+(i+1)+"، رمز "+response.status);
+     parts[i]=await response.text();done++;
+     bar.style.width=Math.floor(done/total*100)+"%";
+     desc.textContent="اكتمل تحميل "+done+" من "+total+" جزءاً.";
+   }
+ }
+ try{
+   await Promise.all(Array.from({length:4},()=>worker()));
+   const complete=parts.join("");
+   if(!complete.startsWith("<!doctype html>")||!complete.includes("</html>"))throw new Error("المحتوى المستلم غير مكتمل");
+   extFrame.addEventListener("load",()=>{loader.hidden=true;}, {once:true});
+   extFrame.srcdoc=complete;
+   loaded=true;
+ }catch(err){
+   title.textContent="تعذّر تحميل المختبر الشامل";
+   desc.textContent=err.message+" — جرّب إعادة التحميل أو افتح فقرة سؤال وجواب.";
+   retry.hidden=false;
+ }finally{loading=false;}
+}
+switchTo("extended");
+})();
+</script>
+</body></html>
